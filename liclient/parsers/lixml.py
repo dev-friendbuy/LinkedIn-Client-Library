@@ -9,6 +9,7 @@ class LinkedInXMLParser(object):
             'person': self.__parse_personal_profile,
             'job-poster': self.__parse_personal_profile,
             'update-comments': self.__parse_update_comments,
+            'likes': self.__parse_likes,
             'connections': self.__parse_connections,
             'error': self.__parse_error,
             'position': self.__parse_position,
@@ -36,6 +37,10 @@ class LinkedInXMLParser(object):
     
     def __parse_update_comments(self, tree):
         content = LinkedInNetworkCommentParser(tree).results
+        return content
+
+    def __parse_likes(self, tree):
+        content = LinkedInLikeParser(tree).results
         return content
     
     def __parse_connections(self, tree):
@@ -228,6 +233,22 @@ class LinkedInNetworkCommentParser(LinkedInXMLParser):
             objs = []
             for c in self.comment_xpath(tree):
                 obj = mappers.NetworkUpdateComment(c)
+                objs.append(obj)
+            return objs
+
+class LinkedInLikeParser(LinkedInXMLParser):
+    def __init__(self, content):
+        self.tree = content
+        self.comment_xpath = etree.XPath('like')
+        self.results = self.__build_data(self.tree)
+
+    def __build_data(self, tree):
+        if not tree.getchildren():
+            return []
+        else:
+            objs = []
+            for c in self.comment_xpath(tree):
+                obj = mappers.Like(c)
                 objs.append(obj)
             return objs
         

@@ -213,6 +213,19 @@ class NetworkUpdateComment(LinkedInData):
                     'profile_url': self.profile_url}
         return jsondict
 
+class Like(LinkedInData):
+    def __init__(self, xml):
+        self.xml = xml
+        self.person_xpath = etree.XPath('person')
+        self.__content = lixml.LinkedInXMLParser(etree.tostring(self.person_xpath(xml)[0])).results[0]
+        self.first_name = self.__content.first_name
+        self.last_name = self.__content.last_name
+
+    def jsonify(self):
+        jsondict = {'first_name': self.first_name,
+                    'last_name': self.last_name}
+        return jsondict
+
 class Profile(LinkedInData):
     def __init__(self, data, xml):
         self.profile_url = ''

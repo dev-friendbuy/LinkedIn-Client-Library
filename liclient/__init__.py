@@ -18,6 +18,8 @@ class LinkedInAPI(object):
         self.api_network_update_url = 'http://api.linkedin.com/v1/people/~/network'
         self.api_comment_feed_url = 'http://api.linkedin.com/v1/people/~/network/updates/' + \
                                         'key={NETWORK UPDATE KEY}/update-comments'
+        self.api_like_feed_url = 'http://api.linkedin.com/v1/people/~/network/updates/' + \
+                                        'key={NETWORK UPDATE KEY}/likes'
         self.api_update_status_url = 'http://api.linkedin.com/v1/people/~/current-status'
         self.api_mailbox_url = 'http://api.linkedin.com/v1/people/~/mailbox'
         
@@ -32,7 +34,7 @@ class LinkedInAPI(object):
         
         self.valid_network_update_codes = ['ANSW', 'APPS', 'CONN', 'JOBS',
                                            'JGRP', 'PICT', 'RECU', 'PRFU',
-                                           'QSTN', 'STAT']
+                                           'QSTN', 'STAT', 'SHAR']
         
     def get_request_token(self):
         """
@@ -130,6 +132,18 @@ class LinkedInAPI(object):
         for the network update as returned by the API.
         """
         url = re.sub(r'\{NETWORK UPDATE KEY\}', network_key, self.api_comment_feed_url)
+        user_token, url = self.prepare_request(access_token, url)
+        client = oauth.Client(self.consumer, user_token)
+        resp, content = client.request(url, 'GET')
+        content = self.clean_dates(content)
+        return LinkedInXMLParser(content).results
+
+    def get_like_feed(self, access_token, network_key):
+        """
+        Get a like feed for a particular network update.  Requires the update key
+        for the network update as returned by the API.
+        """
+        url = re.sub(r'\{NETWORK UPDATE KEY\}', network_key, self.api_like_feed_url)
         user_token, url = self.prepare_request(access_token, url)
         client = oauth.Client(self.consumer, user_token)
         resp, content = client.request(url, 'GET')
