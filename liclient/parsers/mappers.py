@@ -198,6 +198,7 @@ class NetworkJobPostingUpdate(NetworkUpdate):
 class NetworkUpdateComment(LinkedInData):
     def __init__(self, xml):
         self.xml = xml
+        self.id_xpath = etree.XPath('id')
         self.comment_xpath = etree.XPath('comment')
         self.person_xpath = etree.XPath('person')
         self.__content = lixml.LinkedInXMLParser(etree.tostring(self.person_xpath(xml)[0])).results[0]
@@ -205,7 +206,8 @@ class NetworkUpdateComment(LinkedInData):
         self.last_name = self.__content.last_name
         self.profile_url = self.__content.profile_url
         self.update_content = self.comment_xpath(xml)[0].text
-        
+        self.id = self.id_xpath(xml)[0].text
+
     def jsonify(self):
         jsondict = {'first_name': self.first_name,
                     'last_name': self.last_name,
@@ -220,6 +222,7 @@ class Like(LinkedInData):
         self.__content = lixml.LinkedInXMLParser(etree.tostring(self.person_xpath(xml)[0])).results[0]
         self.first_name = self.__content.first_name
         self.last_name = self.__content.last_name
+        self.id = self.person_xpath(xml)[0].findtext('id')
 
     def jsonify(self):
         jsondict = {'first_name': self.first_name,
